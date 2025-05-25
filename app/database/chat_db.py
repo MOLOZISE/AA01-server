@@ -2,7 +2,11 @@ import sqlite3
 import os
 from typing import List, Dict
 
-DB_PATH = os.path.join(os.path.dirname(__file__), "chat.db")
+# 수정 → database 폴더의 chat.db 사용
+# 항상 현재 파일 위치 기준으로 고정
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DB_PATH = os.path.join(BASE_DIR, "chat.db")
+
 
 def connect_db():
     return sqlite3.connect(DB_PATH)
@@ -43,17 +47,25 @@ def list_sessions() -> List[Dict]:
     conn = connect_db()
     cursor = conn.cursor()
     cursor.execute(
-        "SELECT id, created_at FROM sessions ORDER BY created_at DESC"
+        "SELECT id, created_at, summary FROM sessions ORDER BY created_at DESC"
     )
     rows = cursor.fetchall()
     conn.close()
 
-    return [{"session_id": session_id, "created_at": created_at} for session_id, created_at in rows]
+    return [{"session_id": session_id, "created_at": created_at, "summary": summary} for session_id, created_at, summary in rows]
 
 def delete_session(session_id: str):
     conn = connect_db()
     cursor = conn.cursor()
     cursor.execute("DELETE FROM messages WHERE session_id = ?", (session_id,))
     cursor.execute("DELETE FROM sessions WHERE id = ?", (session_id,))
+    conn.commit()
+    conn.close()
+
+
+def save_session_summary(session_id: str, summary: str):
+    conn = connect_db()
+    cursor = conn.cursor()
+    cursor.execute("UPDATE sessions SET summary = ? WHERE id = ?", (summary, session_id))
     conn.commit()
     conn.close()
