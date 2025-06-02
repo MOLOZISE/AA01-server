@@ -74,3 +74,15 @@ async def chat_with_gemini_stream(request: Request):
     except Exception as e:
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))
+    
+
+def call_gemini(prompt: str) -> str:
+    try:
+        response = client.generate_content(
+            model="gemini-2.0-flash",
+            contents=[{"role": "user", "parts": [{"text": prompt}]}],
+        )
+        return response.text
+    except Exception as e:
+        print("Gemini 호출 오류:", e)
+        return "[ERROR]"

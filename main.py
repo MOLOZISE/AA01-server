@@ -10,6 +10,7 @@ from app.database.init_db import init_db
 from app.workflow import create_workflow
 from app import vectorstore
 from app.database import memory_db
+from app.search import chat_search
 
 app = FastAPI()
 
@@ -21,6 +22,9 @@ app.include_router(session_router, prefix="/api")  # 공통 세션/메시지 API
 # 기타 라우터
 app.include_router(memory_db.router)
 app.include_router(vectorstore.router)
+
+app.include_router(chat_search.router)
+
 
 workflow = create_workflow()
 
